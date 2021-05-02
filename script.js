@@ -6,15 +6,42 @@ const form = document.getElementById('form');
 const text = document.getElementById('text');
 const amount = document.getElementById('amount');
 
-const dummyTransactions = [
-    { id: 1, text: 'Flower', amount: -20 },
-    { id: 2, text: 'Salary', amount: 300 },
-    { id: 3, text: 'Car', amount: -20 },
-    { id: 4, text: 'Camera', amount: 150 }
-]
+const localStorageTransactions = JSON.parse(localStorage.getItem('transactions'));
 
-let transactions = dummyTransactions;
+let transactions = localStorage.getItems('transactions') !== null ? localStorageTransactions : [];
 
+// Add transaction
+function addTransaction(e) {
+    e.preventDefault();
+
+    if(text.value.trim() === '' || amount.value.trim() === '') {
+        alert('Please add a text and amount');
+    } else {
+        const transaction = {
+            id: generateID(),
+            text: text.value,
+            amount: +amount.value
+        };
+
+        transactions.push(transaction);
+
+        addTransactionDOM(transaction);
+
+        updateValues();
+
+        updateLocalStorage();
+
+        text.value = '';
+        amount.value = '';
+    }
+}
+
+//  generate random ID
+function generateID() {
+    return Math.floor(Math.random() * 100000000)
+}
+
+// Add transaction to DOM
 function addTransactionDOM(transaction) {
     // Get sign
     const sign = transaction.amount < 0 ? '-' : '+';
@@ -30,6 +57,15 @@ function addTransactionDOM(transaction) {
 
     list.appendChild(item);
 } 
+
+// Remove transaction by ID 
+function removeTransaction(id) {
+    transactions = transactions.filter(transaction => transaction.id !== id);
+
+    updateLocalStorage();
+
+    init();
+}
 
 // Update the balance, income and expense
 function updateValues() {
@@ -52,6 +88,11 @@ function updateValues() {
                     
 }
 
+// Update local storage transactions 
+function updateLocalStorage() {
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+}
+
 
 // Initiate App
 function init() {
@@ -63,3 +104,8 @@ function init() {
 }
 
 init();
+
+
+// Event listeners
+
+form.addEventListener('submit', addTransaction)
